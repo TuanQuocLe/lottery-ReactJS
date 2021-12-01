@@ -12,6 +12,7 @@ function App() {
   const [balance, setBalance] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [message, setMessage] = useState('')
+  const [winner, setWinner] = useState('')
 
   useEffect(() => {
     (async () => {
@@ -35,25 +36,30 @@ function App() {
   }
 
   const pickWinner = async () => {
-    setMessage('Waiting on transaction success...')
-    const accounts = await web3.eth.getAccounts()
+    try {
+      setMessage('Waiting on transaction success...')
+      const accounts = await web3.eth.getAccounts()
 
-    await lottery.methods.pickWinner().send({
-      from: accounts[0]
-    })
-    setMessage('The Winner has been pick!')
+      await lottery.methods.pickWinner().send({
+        from: accounts[0]
+      })
+      setMessage('The Winner has been pick!')
+    } catch (error) {
+      setMessage(error.message)
+    }
+    
   }
 
   return (
-    <div style={{backgroundColor: 'silver', padding: 20}} className="App">
+    <div style={{padding: 50}} className="App">
       <h2>Lotter Contract</h2>
       <p>This contract is managed by {manager} </p>
       <p>There are currently {players.length} people entered, competing to win {web3.utils.fromWei(balance, "ether")} ether!</p>
       <hr/>
       <div>
         <h2>Want to try your luck?</h2>
-        <span>Amount of ether to enter</span>
-        <input placeholder='0.00' value={inputValue} onChange={event => setInputValue(event.target.value)}/>
+        <label style={{marginRight: 20}}>Amount of ether to enter</label>
+        <input  placeholder='0.00' value={inputValue} onChange={event => setInputValue(event.target.value)}/>
         <button onClick={enterToLottery} >Enter</button>
       </div>
       <div>
@@ -66,7 +72,7 @@ function App() {
       </div>
       <hr/>
 
-      <h1>{} has won! Congrats!</h1>
+      {winner && <h1>{winner} has won! Congrats!</h1>}
 
     </div>
   );
